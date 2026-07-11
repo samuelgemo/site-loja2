@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="assets/style.css">
 
 </head>
-<body>
+<body data-categoria="tv">
 
   <!-- Header fornecido -->
   <header class="bg-primary">
@@ -27,17 +27,26 @@
             <li class="nav-item"><a class="nav-link text-white" href="index.html">Celulares</a></li>
             <li class="nav-item"><a class="nav-link text-white" href="tablet.html">Tablets</a></li>
             <li class="nav-item"><a class="nav-link text-white" href="tv.html">TVs</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="admin.html">Admin</a></li>
           </ul>
-          <form class="d-flex" role="search">
-            <input class="form-control me-2" type="search" placeholder="Pesquisar produto..." aria-label="Search"/>
-            <button class="btn btn-outline-light" type="submit"><i class="bi bi-search"></i></button>
+          <form class="d-flex" role="search" id="formPesquisa">
+            <input
+              class="form-control me-2"
+              type="search"
+              id="campoPesquisa"
+              placeholder="Pesquisar produto..."
+              aria-label="Pesquisar produto"
+            >
+            <button class="btn btn-outline-light" type="submit" id="botaoPesquisa">
+              <i class="bi bi-search"></i>
+            </button>
           </form>
         </div>
       </div>
     </nav>  
   </header>
 
-  <h2>TVs</h2>
+  <h3 class="title container my-4">TVs</h3>
 
   <!-- Vitrine -->
   <div class="container my-4">
@@ -47,6 +56,8 @@
 </div>
 
 <!-- Chama o JS externo -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
 <script src="script.js"></script>
 
 

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administração - Vitrine</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+
+<body class="bg-light">
+  <header class="bg-primary">
+    <nav class="navbar">
+      <div class="container">
+        <a class="navbar-brand text-white" href="index.html">Vitrine</a>
+        <span class="text-white">Painel administrativo</span>
+        <button id="botaoSair" class="btn btn-outline-light btn-sm" hidden>
+            Sair
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <section id="areaLogin" class="container py-5">
+    <div class="card mx-auto" style="max-width: 420px;">
+        <div class="card-body p-4">
+        <h1 class="h4 mb-3">Acesso administrativo</h1>
+        <p class="text-secondary">
+            Entre com o e-mail e senha do administrador.
+        </p>
+
+        <form id="formLogin">
+            <div class="mb-3">
+            <label for="emailLogin" class="form-label">E-mail</label>
+            <input
+                class="form-control"
+                id="emailLogin"
+                type="email"
+                required
+            >
+            </div>
+
+            <div class="mb-3">
+            <label for="senhaLogin" class="form-label">Senha</label>
+            <input
+                class="form-control"
+                id="senhaLogin"
+                type="password"
+                required
+            >
+            </div>
+
+            <p id="mensagemLogin" class="text-danger small"></p>
+
+            <button class="btn btn-primary w-100" type="submit">
+            Entrar
+            </button>
+        </form>
+        </div>
+    </div>
+    </section>
+
+  <main id="painelAdmin" class="container py-4" hidden>
+    <h1 class="h3 mb-4">Gerenciar produtos</h1>
+
+    <div class="row g-4">
+      <section class="col-lg-5">
+        <div class="card">
+          <div class="card-body">
+            <h2 class="h5 mb-3" id="tituloFormulario">Adicionar produto</h2>
+
+            <form id="formProduto">
+              <input type="hidden" id="id" name="id">
+
+              <div class="mb-3">
+                <label for="categoria" class="form-label">Categoria</label>
+                <select class="form-select" id="categoria" name="categoria" required>
+                  <option value="">Selecione</option>
+                  <option value="celular">Celular</option>
+                  <option value="tablet">Tablet</option>
+                  <option value="tv">TV</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="titulo" class="form-label">Nome do produto</label>
+                <input class="form-control" id="titulo" name="titulo" required>
+              </div>
+
+              <div class="mb-3">
+                <label for="marca" class="form-label">Marca</label>
+                <input class="form-control" id="marca" name="marca">
+              </div>
+
+              <div class="mb-3">
+                <label for="descricao" class="form-label">Descrição</label>
+                <textarea class="form-control" id="descricao" name="descricao" rows="3"></textarea>
+              </div>
+
+              <div class="mb-3">
+                <label for="img" class="form-label">Imagem</label>
+
+                <input
+                    class="form-control"
+                    id="img"
+                    name="img"
+                    placeholder="ex.: celular.jpg ou https://site.com/imagem.jpg"
+                >
+
+                <div id="areaPreviewImagem" class="image-preview" hidden>
+                    <img id="previewImagem" alt="Prévia do produto">
+                    <small>Prévia da imagem</small>
+                </div>
+            </div>
+
+              <div class="mb-3">
+                <label for="preco" class="form-label">Preço</label>
+                <input class="form-control" id="preco" name="preco"
+                  placeholder="R$ 1.000,00">
+              </div>
+
+              <hr>
+              <p class="text-secondary small">
+                Preencha apenas as especificações que se aplicam ao produto.
+              </p>
+
+              <div class="row">
+                <div class="col-md-6 mb-3" data-categorias="celular tablet">
+                  <label for="armazenamento" class="form-label">Armazenamento</label>
+                  <input class="form-control" id="armazenamento" name="armazenamento">
+                </div>
+
+                <div class="col-md-6 mb-3" data-categorias="celular tablet">
+                  <label for="ram" class="form-label">RAM</label>
+                  <input class="form-control" id="ram" name="ram">
+                </div>
+
+                <div class="col-md-6 mb-3" data-categorias="celular">
+                  <label for="camera" class="form-label">Câmera</label>
+                  <input class="form-control" id="camera" name="camera">
+                </div>
+
+                <div class="col-md-6 mb-3" data-categorias="celular tablet">
+                  <label for="cor" class="form-label">Cores</label>
+                  <input class="form-control" id="cor" name="cor">
+                </div>
+
+                <div class="col-md-6 mb-3" data-categorias="celular tablet tv">
+                  <label for="tela" class="form-label">Tela</label>
+                  <input class="form-control" id="tela" name="tela">
+                </div>
+
+                <div class="col-md-6 mb-3" data-categorias="celular tablet">
+                  <label for="bateria" class="form-label">Bateria</label>
+                  <input class="form-control" id="bateria" name="bateria">
+                </div>
+
+                <div class="col-md-6 mb-3" data-categorias="tv">
+                  <label for="resolucao" class="form-label">Resolução</label>
+                  <input class="form-control" id="resolucao" name="resolucao">
+                </div>
+
+                <div class="col-md-6 mb-3" data-categorias="tv">
+                  <label for="painel" class="form-label">Painel</label>
+                  <input class="form-control" id="painel" name="painel">
+                </div>
+
+                <div class="col-md-6 mb-3" data-categorias="celular tablet tv">
+                  <label for="sistema" class="form-label">Sistema</label>
+                  <input class="form-control" id="sistema" name="sistema">
+                </div>
+              </div>
+
+              <button class="btn btn-primary" type="submit" id="botaoSalvar">
+                Salvar produto
+              </button>
+
+              <button class="btn btn-outline-secondary" type="button" id="botaoCancelar">
+                Cancelar edição
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="col-lg-7">
+        <div class="card">
+          <div class="card-body">
+            <h2 class="h5 mb-3">Produtos cadastrados</h2>
+            <div class="list-group" id="listaProdutos"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
