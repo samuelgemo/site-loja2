@@ -1,3 +1,25 @@
+const parametros = new URLSearchParams(window.location.search);
+
+const vendedorParametro = parametros.get("vendedor");
+
+const vendedores = {
+
+    gil: {
+        nome: "Gil",
+        whatsapp: "5549999001256"
+    },
+
+
+    vivi: {
+        nome: "Vivi",
+        whatsapp: "5549984185249"
+    }
+
+};
+
+const vendedorAtual =
+    vendedores[vendedorParametro] || vendedores.vivi;
+
 function obterUrlImagem(imagem) {
   return imagem.startsWith("http") ? imagem : `assets/img/${imagem}`;
 }
@@ -73,7 +95,7 @@ function criarModal(produto) {
           Adicionar ao carrinho
           </button>
           <a
-              href="https://api.whatsapp.com/send?phone=5549999001256&text=Olá,%20gostaria%20de%20mais%20informações%20sobre%20o%20produto%20${encodeURIComponent(produto.titulo)}."
+              href="https://api.whatsapp.com/send?phone=${vendedorAtual?.whatsapp}&text=Olá,%20gostaria%20de%20mais%20informações%20sobre%20o%20produto%20${encodeURIComponent(produto.titulo)}."
               target="_blank"
               class="btn btn-success"
             >
@@ -106,7 +128,7 @@ function exibirProdutos(listaDeProdutos) {
     const imagem = obterUrlImagem(produto.img);
 
     vitrine.innerHTML += `
-      <div class="col-4">
+      <div class="col-lg-4 col-md-6 col-sm-6 mb-4">
         <div class="card h-100">
           <img
             src="${imagem}"
