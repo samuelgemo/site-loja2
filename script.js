@@ -100,7 +100,7 @@ function criarModal(produto) {
           Adicionar à lista
           </button>
           <a
-              href="https://api.whatsapp.com/send?phone=${vendedorAtual?.whatsapp}&text=Olá,%20gostaria%20de%20mais%20informações%20sobre%20o%20produto%20${encodeURIComponent(produto.titulo)}."
+              href="https://api.whatsapp.com/send?phone=${vendedorAtual?.whatsapp}&text=Olá, ${vendedorAtual?.nome}! Gostaria de mais informações sobre o(a) ${encodeURIComponent(produto.categoria)} + ${encodeURIComponent(produto.titulo)}."
               target="_blank"
               class="btn btn-success"
             >
