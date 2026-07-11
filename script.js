@@ -4,22 +4,18 @@ let produtos = [];
 const parametros = new URLSearchParams(window.location.search);
 const vendedorParametro = parametros.get("vendedor");
 const vendedores = {
+  gil: {
+    nome: "Gil",
+    whatsapp: "5549999001256",
+  },
 
-    gil: {
-        nome: "Gil",
-        whatsapp: "5549999001256"
-    },
-
-
-    vivi: {
-        nome: "Vivi",
-        whatsapp: "5549984185249"
-    }
-
+  vivi: {
+    nome: "Vivi",
+    whatsapp: "5549984185249",
+  },
 };
 
-const vendedorAtual =
-    vendedores[vendedorParametro] || vendedores.vivi;
+const vendedorAtual = vendedores[vendedorParametro] || vendedores.vivi;
 
 function obterUrlImagem(imagem) {
   return imagem.startsWith("http") ? imagem : `assets/img/${imagem}`;
@@ -31,8 +27,41 @@ function informacao(nome, valor) {
   return `<p><strong>${nome}:</strong> ${valor}</p>`;
 }
 
+function criarBolinhasCor(produto) {
+  if (!produto.cores?.length) {
+    return "";
+  }
+
+  return `
+    <div class="seletorCores mt-3">
+
+      ${produto.cores
+        .map(
+          (cor, indice) => `
+
+        <button
+          class="bolinhaCor ${indice === 0 ? "selecionada" : ""}"
+          style="background:${cor.swatch}"
+          data-imagem="${cor.imagem}"
+          data-produto="${produto.id}"
+          data-armazenamentos="${cor.armazenamentos || ""}"
+          title="${cor.nome_cor}">
+        </button>
+
+      `,
+        )
+        .join("")}
+
+    </div>
+  `;
+}
+
 function criarModal(produto) {
-  const imagem = obterUrlImagem(produto.img);
+  const imagemPrincipal = produto.cores?.length
+    ? produto.cores[0].imagem
+    : produto.img;
+
+  const imagem = obterUrlImagem(imagemPrincipal);
 
   return `
     <div class="modal fade" id="modal-${produto.id}" tabindex="-1">
@@ -45,7 +74,13 @@ function criarModal(produto) {
           </div>
           
           <div class="modal-body text-center">
-            <img src="${imagem}" alt="${produto.titulo}">
+            <img 
+              id="imagem-${produto.id}"
+              src="${imagem}" 
+              alt="${produto.titulo}"
+            >
+
+            ${criarBolinhasCor(produto)}
 
             <div class="accordion" id="accordion-${produto.id}">
               <div class="accordion-item">
@@ -69,7 +104,14 @@ function criarModal(produto) {
                     ${informacao("Marca", produto.marca)}
                     ${informacao("Descrição", produto.descricao)}
 
-                    ${informacao("Armazenamento", produto.armazenamento)}
+                    <p id="armazenamento-${produto.id}">
+                        <strong>Armazenamento:</strong>
+                        ${
+                          produto.armazenamento_por_cor
+                            ? produto.cores?.[0]?.armazenamentos || ""
+                            : produto.armazenamento || ""
+                        }
+                    </p>
                     ${informacao("RAM", produto.ram)}
                     ${informacao("Câmera", produto.camera)}
                     ${informacao("Cores", produto.cor)}
@@ -115,91 +157,72 @@ function criarModal(produto) {
 
 //Carrinho
 
-function salvarCarrinho(){
-
-    localStorage.setItem(
-        "carrinho",
-        JSON.stringify(carrinho)
-    );
-
+function salvarCarrinho() {
+  localStorage.setItem("carrinho", JSON.stringify(carrinho));
 }
 
-function atualizarContadorCarrinho(){
-    const contador = document.getElementById("contadorCarrinho");
-    if (!contador) return;
-    if (carrinho.length === 0){
-        contador.hidden = true;
-        return;
-    }
-    contador.hidden = false;
-    contador.textContent = carrinho.length;
-
+function atualizarContadorCarrinho() {
+  const contador = document.getElementById("contadorCarrinho");
+  if (!contador) return;
+  if (carrinho.length === 0) {
+    contador.hidden = true;
+    return;
+  }
+  contador.hidden = false;
+  contador.textContent = carrinho.length;
 }
 
-function adicionarAoCarrinho(produto){
-  const jaExiste = carrinho.find(
-      item => item.id == produto.id
-  );
+function adicionarAoCarrinho(produto) {
+  const jaExiste = carrinho.find((item) => item.id == produto.id);
 
-  if (jaExiste){
-      alert("Produto já está na lista.");
-      return;
+  if (jaExiste) {
+    alert("Produto já está na lista.");
+    return;
   }
 
-  
   carrinho.push(produto);
 
   salvarCarrinho();
 
   atualizarContadorCarrinho();
-
 }
 
 function enviarCarrinhoWhatsapp() {
+  if (carrinho.length === 0) {
+    alert("Sua lista está vazia.");
 
-    if (carrinho.length === 0) {
+    return;
+  }
 
-        alert("Sua lista está vazia.");
-
-        return;
-
-    }
-
-    let mensagem =
-`Olá ${vendedorAtual?.nome || "!"}!
+  let mensagem = `Olá ${vendedorAtual?.nome || "!"}!
 
 Montei uma lista de produtos no site e gostaria de receber mais informações sobre os seguintes itens:
 
 `;
 
-    carrinho.forEach((produto) => {
+  carrinho.forEach((produto) => {
+    mensagem += `${produto.titulo}\n`;
+    mensagem += `Categoria: ${produto.categoria}\n`;
 
-      mensagem += `${produto.titulo}\n`;
-      mensagem += `Categoria: ${produto.categoria}\n`;
+    if (produto.preco) {
+      mensagem += `Preço anunciado: R$ ${produto.preco}\n`;
+    }
 
-      if (produto.preco) {
-          mensagem += `Preço anunciado: R$ ${produto.preco}\n`;
-      }
+    mensagem += "\n";
+  });
 
-      mensagem += "\n";
+  mensagem += `Obrigado! Aguardo o retorno. 😊`;
 
-    });
-
-    mensagem +=
-`Obrigado! Aguardo o retorno. 😊`;
-
-    window.open(
-        `https://api.whatsapp.com/send?phone=${vendedorAtual.whatsapp}&text=${encodeURIComponent(mensagem)}`,
-        "_blank"
-    );
-
+  window.open(
+    `https://api.whatsapp.com/send?phone=${vendedorAtual.whatsapp}&text=${encodeURIComponent(mensagem)}`,
+    "_blank",
+  );
 }
 
-
-
 function criarInterfaceCarrinho() {
-
-    document.body.insertAdjacentHTML("beforeend", `
+  document.body.insertAdjacentHTML(
+    "beforeend",
+    `
       <button id="botaoCarrinho" class="botao-carrinho" data-bs-toggle="modal" data-bs-target="#modalCarrinho">
           🛒
           <span id="contadorCarrinho">
@@ -261,51 +284,43 @@ function criarInterfaceCarrinho() {
             </div>
 
         </div>
-    `);
-      document
-      .getElementById("limparCarrinho")
-      .addEventListener("click", () => {
+    `,
+  );
+  document.getElementById("limparCarrinho").addEventListener("click", () => {
+    if (!confirm("Deseja remover todos os produtos da lista?")) {
+      return;
+    }
 
-          if (!confirm("Deseja remover todos os produtos da lista?")) {
-              return;
-          }
+    carrinho = [];
 
-          carrinho = [];
+    salvarCarrinho();
 
-          salvarCarrinho();
+    atualizarContadorCarrinho();
 
-          atualizarContadorCarrinho();
-
-          renderizarCarrinho();
-
-      });
-      document
+    renderizarCarrinho();
+  });
+  document
     .getElementById("enviarCarrinhoWhatsapp")
     .addEventListener("click", enviarCarrinhoWhatsapp);
 }
 
-
-
 function renderizarCarrinho() {
+  const lista = document.getElementById("listaCarrinho");
 
-    const lista = document.getElementById("listaCarrinho");
+  lista.innerHTML = "";
 
-    lista.innerHTML = "";
-
-    if (carrinho.length === 0) {
-
-        lista.innerHTML = `
+  if (carrinho.length === 0) {
+    lista.innerHTML = `
             <p class="text-center text-secondary">
                 Sua lista está vazia.
             </p>
         `;
 
-        return;
-    }
+    return;
+  }
 
-    carrinho.forEach((produto) => {
-
-        lista.innerHTML += `
+  carrinho.forEach((produto) => {
+    lista.innerHTML += `
 
             <div class="d-flex align-items-center border-bottom py-3">
 
@@ -341,54 +356,44 @@ function renderizarCarrinho() {
             </div>
 
         `;
-
-    });
-
+  });
 }
 
 document.addEventListener("click", (evento) => {
+  const botao = evento.target.closest(".adicionarCarrinho");
 
-    const botao = evento.target.closest(".adicionarCarrinho");
+  if (!botao) return;
 
-    if (!botao) return;
+  const produto = {
+    id: botao.dataset.id,
 
-    const produto = {
+    titulo: botao.dataset.titulo,
 
-        id: botao.dataset.id,
+    preco: botao.dataset.preco,
 
-        titulo: botao.dataset.titulo,
+    img: botao.dataset.img,
 
-        preco: botao.dataset.preco,
+    categoria: botao.dataset.categoria,
+  };
 
-        img: botao.dataset.img,
-
-        categoria: botao.dataset.categoria
-
-    };
-
-    adicionarAoCarrinho(produto);
-
+  adicionarAoCarrinho(produto);
 });
 
 document.addEventListener("click", (evento) => {
+  const botao = evento.target.closest(".removerCarrinho");
 
-    const botao = evento.target.closest(".removerCarrinho");
+  if (!botao) return;
 
-    if (!botao) return;
+  const id = botao.dataset.id;
 
-    const id = botao.dataset.id;
+  carrinho = carrinho.filter((produto) => produto.id != id);
 
-    carrinho = carrinho.filter(produto => produto.id != id);
+  salvarCarrinho();
 
-    salvarCarrinho();
+  atualizarContadorCarrinho();
 
-    atualizarContadorCarrinho();
-
-    renderizarCarrinho();
-
+  renderizarCarrinho();
 });
-
-
 
 function exibirProdutos(listaDeProdutos) {
   const vitrine = document.getElementById("vitrine");
@@ -407,7 +412,11 @@ function exibirProdutos(listaDeProdutos) {
   }
 
   listaDeProdutos.forEach((produto) => {
-    const imagem = obterUrlImagem(produto.img);
+    const imagemPrincipal = produto.cores?.length
+      ? produto.cores[0].imagem
+      : produto.img;
+
+    const imagem = obterUrlImagem(imagemPrincipal);
 
     vitrine.innerHTML += `
       <div class="col-lg-4 col-md-6 col-sm-6 mb-4">
@@ -439,18 +448,60 @@ function exibirProdutos(listaDeProdutos) {
 }
 
 async function carregarProdutosDoBanco() {
-  const { data, error } = await clienteSupabase
+  const { data: produtos, error } = await clienteSupabase
     .from("produtos")
     .select("*")
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Erro ao buscar produtos:", error.message);
+    console.error(error);
     return [];
   }
 
-  return data;
+  const { data: cores } = await clienteSupabase
+    .from("produto_imagens")
+    .select("*")
+    .order("ordem", { ascending: true });
+
+  produtos.forEach((produto) => {
+    produto.cores = cores.filter((cor) => cor.produto_id === produto.id);
+  });
+  console.log(produtos);
+  console.log(cores);
+  return produtos;
 }
+document.addEventListener("click", (evento) => {
+  const botao = evento.target.closest(".bolinhaCor");
+
+  if (!botao) return;
+
+  const imagem = botao.dataset.imagem;
+
+  const armazenamentos = botao.dataset.armazenamentos;
+
+  const produtoId = botao.dataset.produto;
+
+  const imagemPrincipal = document.getElementById(`imagem-${produtoId}`);
+
+  if (imagemPrincipal) {
+    imagemPrincipal.src = obterUrlImagem(imagem);
+  }
+  const campoArmazenamento = document.getElementById(
+    `armazenamento-${produtoId}`,
+  );
+
+  if (campoArmazenamento) {
+    campoArmazenamento.innerHTML = `<strong>Armazenamento:</strong> ${armazenamentos}`;
+  }
+
+  document
+    .querySelectorAll(`.bolinhaCor[data-produto="${produtoId}"]`)
+    .forEach((bolinha) => {
+      bolinha.classList.remove("selecionada");
+    });
+
+  botao.classList.add("selecionada");
+});
 
 window.addEventListener("DOMContentLoaded", async () => {
   const categoriaAtual = document.body.dataset.categoria;
@@ -458,13 +509,9 @@ window.addEventListener("DOMContentLoaded", async () => {
   const campoPesquisa = document.getElementById("campoPesquisa");
   produtos = await carregarProdutosDoBanco();
   criarInterfaceCarrinho();
-  const modalCarrinho =
-  document.getElementById("modalCarrinho");
-  
-  modalCarrinho.addEventListener(
-    "show.bs.modal",
-    renderizarCarrinho
-  );
+  const modalCarrinho = document.getElementById("modalCarrinho");
+
+  modalCarrinho.addEventListener("show.bs.modal", renderizarCarrinho);
   atualizarContadorCarrinho();
 
   // Cria uma área própria para os modais.

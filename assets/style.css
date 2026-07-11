@@ -396,3 +396,22 @@ footer {
     transform: scale(1.15);
 
 }
+
+.seletorCores {
+  display:flex;
+  justify-content:center;
+  gap:10px;
+}
+
+.bolinhaCor {
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  border:2px solid transparent;
+  cursor:pointer;
+}
+
+.bolinhaCor.selecionada {
+  border-color:#000;
+  transform:scale(1.15);
+}

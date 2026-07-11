@@ -408,13 +408,15 @@ window.addEventListener("DOMContentLoaded", async () => {
 
       const arquivo = bloco.querySelector(".arquivoImagemCor").files[0];
 
+      const linkImagem = bloco.querySelector(".imagemCor").value.trim();
+
       const swatch = bloco.querySelector(".swatchCor").value;
 
       const armazenamentos = bloco
         .querySelector(".armazenamentosCor")
         .value.trim();
 
-      let imagem = bloco.dataset.imagemAtual || "";
+      let imagem = linkImagem || bloco.dataset.imagemAtual || "";
 
       if (arquivo) {
         const extensao = arquivo.name.split(".").pop();
@@ -460,12 +462,15 @@ window.addEventListener("DOMContentLoaded", async () => {
   function limparFormulario() {
     formulario.reset();
     document.getElementById("id").value = "";
+    armazenamentoPorCor.checked = false;
 
     tituloFormulario.textContent = "Adicionar produto";
     botaoSalvar.textContent = "Salvar produto";
 
     atualizarEspecificacoes();
     atualizarPreviewImagem();
+    atualizarTipoArmazenamento();
+    atualizarArmazenamentoPorCor();
   }
 
   async function carregarCoresProduto(produtoId) {
@@ -527,12 +532,15 @@ window.addEventListener("DOMContentLoaded", async () => {
         elemento.value = produto[campo] || "";
       }
     });
+    armazenamentoPorCor.checked = produto.armazenamento_por_cor;
 
     tituloFormulario.textContent = "Editar produto";
     botaoSalvar.textContent = "Salvar alterações";
 
     atualizarEspecificacoes();
     atualizarPreviewImagem();
+    atualizarTipoArmazenamento();
+    atualizarArmazenamentoPorCor();
 
     carregarCoresProduto(produto.id);
 
@@ -592,7 +600,7 @@ window.addEventListener("DOMContentLoaded", async () => {
       mensagemLogin.textContent = "E-mail ou senha inválidos.";
       return;
     }
-
+    
     mostrarPainel();
   });
 
@@ -683,6 +691,8 @@ window.addEventListener("DOMContentLoaded", async () => {
     camposPorCategoria[dados.categoria].forEach((campo) => {
       produto[campo] = (dados[campo] || "").trim();
     });
+
+    produto.armazenamento_por_cor = armazenamentoPorCor.checked;
 
     if (arquivoSelecionado) {
       const extensao = arquivoSelecionado.name.includes(".")
