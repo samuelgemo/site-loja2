@@ -324,3 +324,75 @@ footer {
   color: var(--texto-suave);
   font-weight: 600;
 }
+
+.botao-carrinho {
+
+    position: fixed;
+
+    right: 20px;
+    bottom: 20px;
+    background: #8dd2e9;
+
+    width: 60px;
+    height: 60px;
+
+    border-radius: 50%;
+
+    border: none;
+
+    cursor: pointer;
+
+    font-size: 28px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    z-index: 1000;
+    
+
+}
+
+/* Celular */
+@media (max-width: 768px) {
+
+    .botao-carrinho {
+
+        right: 20px;
+        bottom: 80px;
+
+    }
+
+}
+
+#contadorCarrinho {
+
+    position: absolute;
+
+    top: -2px;
+    right: -2px;
+
+
+    min-width: 22px;
+    height: 22px;
+
+
+    border-radius: 50%;
+
+
+    font-size: 15px;
+    font-weight: 600;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+}
+
+.botao-carrinho.animar {
+
+    transform: scale(1.15);
+
+}

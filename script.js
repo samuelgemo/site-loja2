@@ -1,7 +1,8 @@
+let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
+let produtos = [];
+
 const parametros = new URLSearchParams(window.location.search);
-
 const vendedorParametro = parametros.get("vendedor");
-
 const vendedores = {
 
     gil: {
@@ -89,10 +90,14 @@ function criarModal(produto) {
 </div>
 
           <div class="modal-footer">
-          <button class="btn btn-primary justify-content-start" style="display: flex; gap: 0.5rem; margin-right: auto;"
+          <button class="btn btn-primary justify-content-start adicionarCarrinho" style="display: flex; gap: 0.5rem; margin-right: auto;"
           data-id="${produto.id}"
+          data-titulo="${produto.titulo}"
+          data-preco="${produto.preco}"
+          data-img="${produto.img}"
+          data-categoria="${produto.categoria}"
           data-acao="carrinho">
-          Adicionar ao carrinho
+          Adicionar à lista
           </button>
           <a
               href="https://api.whatsapp.com/send?phone=${vendedorAtual?.whatsapp}&text=Olá,%20gostaria%20de%20mais%20informações%20sobre%20o%20produto%20${encodeURIComponent(produto.titulo)}."
@@ -107,6 +112,283 @@ function criarModal(produto) {
     </div>
   `;
 }
+
+//Carrinho
+
+function salvarCarrinho(){
+
+    localStorage.setItem(
+        "carrinho",
+        JSON.stringify(carrinho)
+    );
+
+}
+
+function atualizarContadorCarrinho(){
+    const contador = document.getElementById("contadorCarrinho");
+    if (!contador) return;
+    if (carrinho.length === 0){
+        contador.hidden = true;
+        return;
+    }
+    contador.hidden = false;
+    contador.textContent = carrinho.length;
+
+}
+
+function adicionarAoCarrinho(produto){
+  const jaExiste = carrinho.find(
+      item => item.id == produto.id
+  );
+
+  if (jaExiste){
+      alert("Produto já está na lista.");
+      return;
+  }
+
+  
+  carrinho.push(produto);
+
+  salvarCarrinho();
+
+  atualizarContadorCarrinho();
+
+}
+
+function enviarCarrinhoWhatsapp() {
+
+    if (carrinho.length === 0) {
+
+        alert("Sua lista está vazia.");
+
+        return;
+
+    }
+
+    let mensagem =
+`Olá ${vendedorAtual?.nome || "!"}!
+
+Montei uma lista de produtos no site e gostaria de receber mais informações sobre os seguintes itens:
+
+`;
+
+    carrinho.forEach((produto) => {
+
+      mensagem += `${produto.titulo}\n`;
+      mensagem += `Categoria: ${produto.categoria}\n`;
+
+      if (produto.preco) {
+          mensagem += `Preço anunciado: R$ ${produto.preco}\n`;
+      }
+
+      mensagem += "\n";
+
+    });
+
+    mensagem +=
+`Obrigado! Aguardo o retorno. 😊`;
+
+    window.open(
+        `https://api.whatsapp.com/send?phone=${vendedorAtual.whatsapp}&text=${encodeURIComponent(mensagem)}`,
+        "_blank"
+    );
+
+}
+
+
+
+function criarInterfaceCarrinho() {
+
+    document.body.insertAdjacentHTML("beforeend", `
+      <button id="botaoCarrinho" class="botao-carrinho" data-bs-toggle="modal" data-bs-target="#modalCarrinho">
+          🛒
+          <span id="contadorCarrinho">
+              0
+          </span>
+      </button>
+        <div class="modal fade" id="modalCarrinho" tabindex="-1">
+
+            <div class="modal-dialog modal-dialog-scrollable">
+
+                <div class="modal-content">
+
+                    <div class="modal-header">
+
+                        <h5 class="modal-title">
+                            Minha lista
+                        </h5>
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Fechar">
+                        </button>
+
+                    </div>
+
+                    <div
+                        class="modal-body"
+                        id="listaCarrinho">
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button
+                            class="btn btn-outline-danger"
+                            id="limparCarrinho"
+                            style="display: flex; gap: 0.5rem; margin-right: auto;">
+
+                            Limpar lista
+
+                        </button>
+
+                        <button
+                            class="btn btn-success"
+                            id="enviarCarrinhoWhatsapp">
+
+                            <i class="bi bi-whatsapp"></i>
+
+                            Enviar lista
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    `);
+      document
+      .getElementById("limparCarrinho")
+      .addEventListener("click", () => {
+
+          if (!confirm("Deseja remover todos os produtos da lista?")) {
+              return;
+          }
+
+          carrinho = [];
+
+          salvarCarrinho();
+
+          atualizarContadorCarrinho();
+
+          renderizarCarrinho();
+
+      });
+      document
+    .getElementById("enviarCarrinhoWhatsapp")
+    .addEventListener("click", enviarCarrinhoWhatsapp);
+}
+
+
+
+function renderizarCarrinho() {
+
+    const lista = document.getElementById("listaCarrinho");
+
+    lista.innerHTML = "";
+
+    if (carrinho.length === 0) {
+
+        lista.innerHTML = `
+            <p class="text-center text-secondary">
+                Sua lista está vazia.
+            </p>
+        `;
+
+        return;
+    }
+
+    carrinho.forEach((produto) => {
+
+        lista.innerHTML += `
+
+            <div class="d-flex align-items-center border-bottom py-3">
+
+                <img
+                    src="${obterUrlImagem(produto.img)}"
+                    style="
+                        width:70px;
+                        height:70px;
+                        object-fit:cover;
+                        border-radius:10px;
+                    ">
+
+                <div class="ms-3 flex-grow-1">
+
+                    <h6 class="mb-1">
+                        ${produto.titulo}
+                    </h6>
+
+                    <strong>
+                        R$ ${produto.preco}
+                    </strong>
+
+                </div>
+
+                <button
+                    class="btn btn-outline-danger btn-sm removerCarrinho"
+                    data-id="${produto.id}">
+
+                    🗑️
+
+                </button>
+
+            </div>
+
+        `;
+
+    });
+
+}
+
+document.addEventListener("click", (evento) => {
+
+    const botao = evento.target.closest(".adicionarCarrinho");
+
+    if (!botao) return;
+
+    const produto = {
+
+        id: botao.dataset.id,
+
+        titulo: botao.dataset.titulo,
+
+        preco: botao.dataset.preco,
+
+        img: botao.dataset.img,
+
+        categoria: botao.dataset.categoria
+
+    };
+
+    adicionarAoCarrinho(produto);
+
+});
+
+document.addEventListener("click", (evento) => {
+
+    const botao = evento.target.closest(".removerCarrinho");
+
+    if (!botao) return;
+
+    const id = botao.dataset.id;
+
+    carrinho = carrinho.filter(produto => produto.id != id);
+
+    salvarCarrinho();
+
+    atualizarContadorCarrinho();
+
+    renderizarCarrinho();
+
+});
+
+
 
 function exibirProdutos(listaDeProdutos) {
   const vitrine = document.getElementById("vitrine");
@@ -174,7 +456,16 @@ window.addEventListener("DOMContentLoaded", async () => {
   const categoriaAtual = document.body.dataset.categoria;
   const formulario = document.getElementById("formPesquisa");
   const campoPesquisa = document.getElementById("campoPesquisa");
-  const produtos = await carregarProdutosDoBanco();
+  produtos = await carregarProdutosDoBanco();
+  criarInterfaceCarrinho();
+  const modalCarrinho =
+  document.getElementById("modalCarrinho");
+  
+  modalCarrinho.addEventListener(
+    "show.bs.modal",
+    renderizarCarrinho
+  );
+  atualizarContadorCarrinho();
 
   // Cria uma área própria para os modais.
   const modais = document.createElement("div");
