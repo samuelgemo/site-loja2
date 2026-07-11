@@ -67,10 +67,18 @@ function criarModal(produto) {
 </div>
 
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary"
-              data-bs-dismiss="modal">
-              Fechar
-            </button>
+          <button class="btn btn-primary justify-content-start" style="display: flex; gap: 0.5rem; margin-right: auto;"
+          data-id="${produto.id}"
+          data-acao="carrinho">
+          Adicionar ao carrinho
+          </button>
+          <a
+              href="https://api.whatsapp.com/send?phone=5549999001256&text=Olá,%20gostaria%20de%20mais%20informações%20sobre%20o%20produto%20${encodeURIComponent(produto.titulo)}."
+              target="_blank"
+              class="btn btn-success"
+            >
+              <i class=" bi bi-whatsapp">  WhatsApp</i>
+            </a>
           </div>
         </div>
       </div>
@@ -98,7 +106,7 @@ function exibirProdutos(listaDeProdutos) {
     const imagem = obterUrlImagem(produto.img);
 
     vitrine.innerHTML += `
-      <div class="col">
+      <div class="col-4">
         <div class="card h-100">
           <img
             src="${imagem}"
@@ -114,7 +122,9 @@ function exibirProdutos(listaDeProdutos) {
             </span>
 
             <h5 class="card-title">${produto.titulo}</h5>
-            <p class="card-text">${produto.descricao}</p>
+            <p class="card-text fw-bold">
+              R$ ${produto.preco || "Preço sob consulta"}
+            </p>
           </div>
         </div>
       </div>

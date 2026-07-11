@@ -13,11 +13,15 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   const campoCategoria = document.getElementById("categoria");
   const campoImagem = document.getElementById("img");
+  const campoArquivoImagem = document.getElementById("arquivoImagem");
   const areaPreviewImagem = document.getElementById("areaPreviewImagem");
   const previewImagem = document.getElementById("previewImagem");
   const gruposEspecificacao = formulario.querySelectorAll("[data-categorias]");
+  const botaoRemoverImagem = document.getElementById("botaoRemoverImagem");
+  
 
   let produtos = [];
+  let arquivoSelecionado = null;
 
   const camposPorCategoria = {
     celular: [
@@ -54,20 +58,34 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 
   function atualizarPreviewImagem() {
-    const valor = campoImagem.value.trim();
 
-    if (!valor) {
-      areaPreviewImagem.hidden = true;
-      previewImagem.removeAttribute("src");
-      return;
-    }
+  if (arquivoSelecionado) {
+    previewImagem.src =
+      URL.createObjectURL(arquivoSelecionado);
+    areaPreviewImagem.hidden = false;
 
-    previewImagem.src = valor.startsWith("http")
+    return;
+  }
+
+  const valor = campoImagem.value.trim();
+
+  if (!valor) {
+
+    previewImagem.removeAttribute("src");
+    areaPreviewImagem.hidden = true;
+
+    return;
+
+  }
+
+  previewImagem.src =
+    valor.startsWith("http")
       ? valor
       : `assets/img/${valor}`;
 
-    areaPreviewImagem.hidden = false;
-  }
+  areaPreviewImagem.hidden = false;
+
+}
 
   function exibirProdutos() {
     lista.innerHTML = "";
@@ -222,8 +240,52 @@ window.addEventListener("DOMContentLoaded", async () => {
     mostrarLogin();
   });
 
-  campoCategoria.addEventListener("change", atualizarEspecificacoes);
-  campoImagem.addEventListener("input", atualizarPreviewImagem);
+ campoCategoria.addEventListener("change", atualizarEspecificacoes);
+
+campoImagem.addEventListener("input", () => {
+    if (campoImagem.value.trim() !== "") {
+        arquivoSelecionado = null;
+        campoArquivoImagem.value = "";
+    }
+    atualizarPreviewImagem();
+});
+
+campoArquivoImagem.addEventListener("change", () => {
+    if (campoArquivoImagem.files.length > 0) {
+        arquivoSelecionado =
+            campoArquivoImagem.files[0];
+        campoImagem.value = "";
+    }
+    atualizarPreviewImagem();
+});
+botaoRemoverImagem.addEventListener("click", () => {
+
+    arquivoSelecionado = null;
+
+    campoArquivoImagem.value = "";
+
+    campoImagem.value = "";
+
+    atualizarPreviewImagem();
+});
+campoImagem.addEventListener("paste", (evento) => {
+    const itens = evento.clipboardData.items;
+    for (const item of itens) {
+        if (item.type.startsWith("image")) {
+
+            arquivoSelecionado =
+                item.getAsFile();
+
+            campoImagem.value = "";
+            campoArquivoImagem.value = "";
+            atualizarPreviewImagem();
+
+            break;
+        }
+    }
+});
+
+  campoArquivoImagem.addEventListener("change", atualizarPreviewImagem);
 
   previewImagem.addEventListener("error", () => {
     areaPreviewImagem.hidden = true;
@@ -232,6 +294,10 @@ window.addEventListener("DOMContentLoaded", async () => {
   formulario.addEventListener("submit", async (evento) => {
     evento.preventDefault();
 
+    const { data: usuario } = await clienteSupabase.auth.getUser();
+
+    console.log(usuario);
+
     const dados = Object.fromEntries(new FormData(formulario).entries());
     const produto = {};
 
@@ -239,6 +305,44 @@ window.addEventListener("DOMContentLoaded", async () => {
       produto[campo] = (dados[campo] || "").trim();
     });
 
+    if (arquivoSelecionado) {
+
+        const extensao = arquivoSelecionado.name.includes(".")
+        ? arquivoSelecionado.name.split(".").pop()
+        : arquivoSelecionado.type.split("/")[1];
+
+        const nomeArquivo =
+            `${Date.now()}-${Math.random().toString(36).substring(2)}.${extensao}`;
+
+        console.log("Arquivo selecionado:", arquivoSelecionado);
+        console.log("Nome:", arquivoSelecionado.name);
+        console.log("Tipo:", arquivoSelecionado.type);
+        const { error: erroUpload } =
+            await clienteSupabase.storage
+                .from("produtos")
+                .upload(nomeArquivo, arquivoSelecionado,);
+
+        if (erroUpload) {
+
+            alert(erroUpload.message);
+
+            return;
+
+        }
+
+        const { data } =
+            clienteSupabase.storage
+                .from("produtos")
+                .getPublicUrl(nomeArquivo);
+
+        produto.img = data.publicUrl;
+
+    }
+    if (!arquivoSelecionado && dados.img.trim() !== "") {
+
+        produto.img = dados.img.trim();
+
+    }
     let error;
 
     if (produto.id) {
@@ -251,7 +355,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         .eq("id", id));
     } else {
       delete produto.id;
-
+    
       ({ error } = await clienteSupabase
         .from("produtos")
         .insert(produto));

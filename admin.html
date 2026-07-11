@@ -98,19 +98,43 @@
                 <textarea class="form-control" id="descricao" name="descricao" rows="3"></textarea>
               </div>
 
-              <div class="mb-3">
-                <label for="img" class="form-label">Imagem</label>
-
+            <div class="mb-3">
+                <label for="img" class="form-label">
+                    Imagem
+                </label>
                 <input
-                    class="form-control"
+                    class="form-control mb-2"
                     id="img"
                     name="img"
-                    placeholder="ex.: celular.jpg ou https://site.com/imagem.jpg"
+                    placeholder="Cole um link ou uma imagem (Ctrl + V)"
                 >
 
-                <div id="areaPreviewImagem" class="image-preview" hidden>
+                <div class="text-center text-secondary small my-2">
+                    ou
+                </div>
+
+                <div class="input-group">
+                    <input
+                        class="form-control"
+                        type="file"
+                        id="arquivoImagem"
+                        accept="image/*"
+                    >
+                    <button
+                        class="btn btn-outline-danger"
+                        type="button"
+                        id="botaoRemoverImagem"
+                        title="Remover imagem"
+                    >
+                        🗑️
+                    </button>
+                </div>
+
+                <div id="areaPreviewImagem" class="image-preview mt-3" hidden>
                     <img id="previewImagem" alt="Prévia do produto">
-                    <small>Prévia da imagem</small>
+                    <small>
+                        Prévia da imagem
+                    </small>
                 </div>
             </div>
 
